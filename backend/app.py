@@ -8,7 +8,8 @@ from models import queueData
 app = FastAPI()
 
 class DetectionData(BaseModel):
-    id: int           
+    id: int     
+    timeStamp: datetime      
     waitTime: float   
 def get_db():
     db = sessionLocal()  # Create new session
@@ -21,7 +22,7 @@ def get_db():
 def root():
     return {"message":"backend is running"}
 
-@app.post("/update_data/")
+@app.post("/updateData/")
 def update_detection(data: DetectionData, db: Session = Depends(get_db)):
     """
     This route receives the detected person's ID and waitTime from YOLO script
@@ -29,7 +30,7 @@ def update_detection(data: DetectionData, db: Session = Depends(get_db)):
     """
     entry = queueData(
         id=data.id,                              #Use YOLO's person ID
-        timeStamp=datetime.now(timezone.utc),    
+        timeStamp=data.timeStamp,   
         waitTime=data.waitTime                   # Save the person's waiting time
     )
 
@@ -43,3 +44,4 @@ def update_detection(data: DetectionData, db: Session = Depends(get_db)):
         "timeStamp": entry.timeStamp.isoformat(),
         "waitTime": entry.waitTime
     }
+
